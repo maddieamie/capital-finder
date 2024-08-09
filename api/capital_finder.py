@@ -16,19 +16,43 @@ class Handler(BaseHTTPRequestHandler):
         # filter response https://restcountries.com/v3.1/all?fields=name,capital
 
         if "query" in dic:
-            url = "https://restcountries.com/v3.1/all?fields=name,capital"
-            r = requests.get(url + dic["query"])
-            data = r.json()
-            # message_thing = []
-            for country_data in data:
-                country_name = country_data["name"][0]
-                capital = country_data["capital"][0]
-                # message_thing.append(country_name, capital)
+            query_value = dic["query"].strip()
 
-                if dic["query"] == country_name:
-                    message = f'The capital of {country_name} is {capital}.'
-                elif dic["query"] == capital:
-                    message = f'{capital} is the capital of {country_name}'
+            if "country" in query_value.lower():
+                country_name = query_value.split('=')[1]
+                url = f"https://restcountries.com/v3.1/name/{country_name}?fields=name,capital"
+
+            elif "capital=" in query_value.lower():
+                capital_name = query_value.split('=')[1]
+                url = f"https://restcountries.com/v3.1/capital/{capital_name}?fields=name,capital"
+            else:
+                # api just tries whatever as a country
+                url = f"https://restcountries.com/v3.1/name/{query_value}?fields=name,capital"
+
+            r = requests.get(url)
+
+            if r.status_code != 200:
+                # tries for capital if unspecified query fails as a country
+                url = f"https://restcountries.com/v3.1/capital/{query_value}?fields=name,capital"
+
+                r = requests.get(url)
+
+            if r.status_code == 200:
+
+                data = r.json()
+
+                for country_data in data:
+                    country_name = country_data["name"][0]
+                    capital = country_data["capital"][0]
+
+                    if dic["query"] == country_name:
+                        message = f'The capital of {country_name.title()} is {capital.title()}.'
+                        break
+                    elif dic["query"] == capital:
+                        message = f'{capital.title()} is the capital of {country_name.title()}.'
+                        break
+                    else:
+                        message = "No results found for the query provided."
         else:
             message = """Query did not produce results, please enter either a country name 
             or the name of a capital of a country."""
