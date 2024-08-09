@@ -12,6 +12,10 @@ Install requirements.txt in a virtual environment, or go to [deployment link](ca
 
 [//]: # (### How to initialize/run your application &#40;where applicable&#41;)
 
+To run a query, structure it like so: 
+https://capital-finder.vercel.app/api/capital_finder?query=country=Chile
+
+where "country" could be that or "capital", and "Chile" can be replaced by either another country name or a capital city name with the capital prompt. 
 
 ### Tests
 
