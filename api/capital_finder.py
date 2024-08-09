@@ -15,48 +15,46 @@ class Handler(BaseHTTPRequestHandler):
         # /capital-finder?capital=Santiago -> https://restcountries.com/v3.1/capital/{capital}
         # filter response https://restcountries.com/v3.1/all?fields=name,capital
 
-        if "query" in dic:
-            query_value = dic["query"].strip()
+        if "country" in dic:
+            country_name = dic["country"].strip()
+            url = f"https://restcountries.com/v3.1/name/{country_name}?fields=name,capital"
 
-            if "country=" in query_value.lower():
-                country_name = query_value.split('=')[1]
-                url = f"https://restcountries.com/v3.1/name/{country_name}?fields=name,capital"
-
-            elif "capital=" in query_value.lower():
-                capital_name = query_value.split('=')[1]
-                url = f"https://restcountries.com/v3.1/capital/{capital_name}?fields=name,capital"
-            else:
-                # api just tries whatever as a country
-                url = f"https://restcountries.com/v3.1/name/{query_value}?fields=name,capital"
-
-            r = requests.get(url)
-
-            if r.status_code != 200:
-                # tries for capital if unspecified query fails as a country
-                url = f"https://restcountries.com/v3.1/capital/{query_value}?fields=name,capital"
-
-                r = requests.get(url)
-
-            if r.status_code == 200:
-
-                data = r.json()
-                message = "No results for the query provided."
-
-                for country_data in data:
-                    country_name = country_data["name"]["common"]
-                    capital = country_data["capital"][0] if "capital" in country_data else "No capital found"
-
-                    if dic["query"].strip().lower() == country_name.lower():
-                        message = f'The capital of {country_name.title()} is {capital.title()}.'
-                        break
-                    elif dic["query"].strip().lower() == capital.lower():
-                        message = f'{capital.title()} is the capital of {country_name.title()}.'
-                        break
-                else:
-                    message = "Failed to fetch data from the API. "
+        elif "capital" in dic:
+            capital_name = dic["capital"].strip()
+            url = f"https://restcountries.com/v3.1/capital/{capital_name}?fields=name,capital"
         else:
-            message = """Query did not produce results, please enter either a country name 
-            or the name of a capital of a country."""
+            # Default case if no recognized query parameter is found
+            message = "Please provide a valid query parameter: country or capital."
+            self.send_response(400) # Bad Request Code
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(message.encode())
+            return
+
+        r = requests.get(url)
+
+        if r.status_code != 200:
+            message = "Failed to fetch data from the API."
+            self.send_response(500) # Server Error
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(message.encode())
+            return
+
+        data = r.json()
+        if not data:
+            message = "No results for the query provided."
+        else:
+            country_data = data[0]
+            country_name = country_data["name"]["common"]
+            capital = country_data["capital"][0] if "capital" in country_data else "No capital found"
+
+            if "country" in dic:
+                message = f'The capital of {country_name.title()} is {capital.title()}.'
+
+            elif "capital" in dic:
+                message = f'{capital.title()} is the capital of {country_name.title()}.'
+
 
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')

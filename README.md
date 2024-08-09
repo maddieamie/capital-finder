@@ -16,14 +16,15 @@ Install requirements.txt in a virtual environment, or go to [deployment link](ht
 [//]: # (### How to initialize/run your application &#40;where applicable&#41;)
 
 To run a query, structure it like so: 
-https://capital-finder-maddieamie.vercel.app/api/capital_finder?query=capital=Santiago
+https://capital-finder-maddieamie.vercel.app/api/capital_finder?capital=Santiago
 
 where "capital" could be that or "country", and "Santiago" can be replaced by either another country's capital's name or a country name with the country prompt. 
 
-ex: query=capital=Santiago
+ex: capital=Santiago
 for a capital city
 
-ex: query=country=Chile
+ex: country=Chile
+
 for a country 
 
 ### Tests
