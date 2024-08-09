@@ -18,7 +18,7 @@ class Handler(BaseHTTPRequestHandler):
         if "query" in dic:
             query_value = dic["query"].strip()
 
-            if "country" in query_value.lower():
+            if "country=" in query_value.lower():
                 country_name = query_value.split('=')[1]
                 url = f"https://restcountries.com/v3.1/name/{country_name}?fields=name,capital"
 
@@ -40,19 +40,20 @@ class Handler(BaseHTTPRequestHandler):
             if r.status_code == 200:
 
                 data = r.json()
+                message = "No results for the query provided."
 
                 for country_data in data:
-                    country_name = country_data["name"][0]
-                    capital = country_data["capital"][0]
+                    country_name = country_data["name"]["common"]
+                    capital = country_data["capital"][0] if "capital" in country_data else "No capital found"
 
-                    if dic["query"] == country_name:
+                    if dic["query"].strip().lower() == country_name.lower():
                         message = f'The capital of {country_name.title()} is {capital.title()}.'
                         break
-                    elif dic["query"] == capital:
+                    elif dic["query"].strip().lower() == capital.lower():
                         message = f'{capital.title()} is the capital of {country_name.title()}.'
                         break
-                    else:
-                        message = "No results found for the query provided."
+                else:
+                    message = "Failed to fetch data from the API. "
         else:
             message = """Query did not produce results, please enter either a country name 
             or the name of a capital of a country."""
