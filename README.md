@@ -24,6 +24,7 @@ ex: capital=Santiago
 for a capital city
 
 ex: country=Chile
+
 for a country 
 
 ### Tests

@@ -55,6 +55,7 @@ class Handler(BaseHTTPRequestHandler):
             elif "capital" in dic:
                 message = f'{capital.title()} is the capital of {country_name.title()}.'
 
+
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
